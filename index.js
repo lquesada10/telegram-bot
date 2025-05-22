@@ -7,13 +7,13 @@ const { Telegraf, Markup } = require('telegraf');
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
 // Lista de supervisores autorizados
-const SUPERVISORES = [7939979525]; // Agrega más IDs separados por comas
+const SUPERVISORES = [7939979525]; // Agrega más IDs si hace falta
 
 const MAKE_HOOK = process.env.MAKE_HOOK_URL;
 
 // /start muestra botón SOLO a supervisores
 bot.start(async ctx => {
-  const chatId = ctx.message.from.id;
+  const chatId = ctx.from.id;  // 🔁 corregido
 
   if (!SUPERVISORES.includes(chatId)) {
     await ctx.reply('❌ No tienes acceso para reportar problemas.');
@@ -65,10 +65,7 @@ bot.on('web_app_data', async ctx => {
   );
 });
 
-// Arranque
 bot
   .launch()
   .then(() => console.log('🤖 Bot en línea'))
   .catch(err => console.error('Error al arrancar:', err));
-
-
