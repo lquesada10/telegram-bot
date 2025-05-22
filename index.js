@@ -10,30 +10,18 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 // URL del webhook de Make
 const MAKE_HOOK = process.env.MAKE_HOOK_URL;
 
-bot.start(ctx =>
-  ctx.reply(
-    '¡Hola 👋! Elige una opción:',
-    Markup.keyboard([
-      // Mini-app 1: Reportar problema
-      [
-        Markup.button.webApp(
-          '📝 Reportar problema',
-          process.env.WEBAPP_REPORT_URL
-        )
-      ],
-      // Mini-app 2: Atender reporte
-      [
-        Markup.button.webApp(
-          '🛠️ Atender reporte',
-          process.env.WEBAPP_TECH_URL
-        )
-      ]
-    ])
-      .resize()
-      .oneTime()
-  )
-);
+// ✅ Borra el teclado persistente anterior si el usuario manda un mensaje cualquiera
+bot.on('message', async (ctx) => {
+  if (ctx.message.text !== '/start') {
+    await ctx.reply('✅ Listo. Menú eliminado.', {
+      reply_markup: {
+        remove_keyboard: true
+      }
+    });
+  }
+});
 
+// 🧠 Recibe los datos enviados desde las Mini Apps (WebApp)
 bot.on('web_app_data', async ctx => {
   const payload = JSON.parse(ctx.message.web_app_data.data);
 
@@ -57,6 +45,7 @@ bot.on('web_app_data', async ctx => {
   );
 });
 
+// 🚀 Inicia el bot
 bot
   .launch()
   .then(() => console.log('🤖 Bot en línea'))
