@@ -1,12 +1,9 @@
 require('dotenv').config();
-
-const { Telegraf, Markup } = require('telegraf');
+const { Telegraf } = require('telegraf');
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
-// Lista de supervisores autorizados
-const SUPERVISORES = [7939979525]; // Tu chat_id
+const SUPERVISORES = process.env.SUPERVISOR_IDS.split(',').map(id => Number(id.trim()));
 
-// 🟡 Muestra botón si escriben "reportar"
 bot.hears('reportar', async ctx => {
   const chatId = ctx.message.from.id;
 
@@ -18,19 +15,16 @@ bot.hears('reportar', async ctx => {
   await ctx.reply('📝 Selecciona la opción para reportar un problema:', {
     reply_markup: {
       inline_keyboard: [
-        [
-          {
-            text: '📋 Reportar problema',
-            web_app: { url: process.env.WEBAPP_URL }
-          }
-        ]
+        [{
+          text: '📋 Reportar problema',
+          web_app: { url: 'https://appmantenimiento.vercel.app' }
+        }]
       ]
     }
   });
 });
 
-// ✅ Comando oculto solo para ti (Luciano)
-bot.command('desbloquear', async (ctx) => {
+bot.command('desbloquear', async ctx => {
   const userId = ctx.message.from.id;
 
   if (!SUPERVISORES.includes(userId)) {
@@ -50,19 +44,18 @@ bot.command('desbloquear', async (ctx) => {
   });
 });
 
-// 🔄 Limpia menú si escriben otra cosa
 bot.on('message', async ctx => {
   const msg = ctx.message.text;
-  if (msg !== '/start' && msg !== 'reportar' && msg !== '/desbloquear') {
+  if (!['/start', 'reportar', '/desbloquear'].includes(msg)) {
     await ctx.reply('✅ Menú eliminado.', {
       reply_markup: { remove_keyboard: true }
     });
   }
 });
 
-// 🚀 Lanzar bot
 bot
   .launch()
   .then(() => console.log('🤖 Bot en línea'))
   .catch(err => console.error('Error al arrancar:', err));
+
 
